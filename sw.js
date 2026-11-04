@@ -1,7 +1,7 @@
 /* =========================================================
    Shunfenger Sound Level Meter — Service Worker (sw.js)
    ========================================================= */
-const CACHE_VERSION = 'v1.4.1';
+const CACHE_VERSION = 'v1.5.1';
 const CACHE_NAME = `shunfenger-${CACHE_VERSION}`;
 
 const APP_SHELL = [
