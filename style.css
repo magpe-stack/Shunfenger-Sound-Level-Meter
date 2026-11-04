@@ -1,3 +1,4 @@
+
 /* =========================================================
    Shunfenger Sound Level Meter — style.css
    Paleta: #873ff3 · #000000 · #ffffff · #B487F7 · #E1CFFC
@@ -41,7 +42,7 @@
 
 html, body {
   height: 100%;
-  overflow: hidden;               /* tela principal: SEM rolagem */
+  overflow: hidden;
   overscroll-behavior: none;
   background: var(--bg);
   color: var(--text);
@@ -211,19 +212,35 @@ main { flex: 1; min-height: 0; position: relative; }
 .ghost-btn.danger { border-color: color-mix(in srgb, var(--p) 40%, var(--white)); }
 
 .history-list { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 10px; padding-bottom: 12px; }
-.rec { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); }
-.rec-db { text-align: center; min-width: 74px; }
-.rec-db b { display: block; font-size: 1.7rem; font-weight: 800; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; }
-.rec-db small { color: var(--muted); font-size: .7rem; }
-.rec-info { min-width: 0; font-size: .8rem; line-height: 1.4; }
-.rec-info strong { font-size: .88rem; }
-.rec-info .muted { color: var(--muted); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rec-del { width: 34px; height: 34px; border-radius: 10px; color: var(--muted); border: 1px solid var(--line); }
-.rec-note { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
-.rec-note input { flex: 1; min-width: 0; padding: 9px 11px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; font-size: .82rem; }
-.rec-note input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent-soft); }
-.rec-note input::placeholder { color: var(--muted); }
-.note-count { flex: none; font-size: .68rem; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
+/* Cartão completo de medição, com fotografia opcional */
+.rec { display: flex; flex-direction: column; align-items: stretch; gap: 13px; padding: 15px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); min-width: 0; }
+.rec-heading, .rec-primary { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.rec-heading { font-size: .87rem; }
+.rec-level { background: var(--card-2); border-radius: 20px; padding: 5px 9px; font-size: .73rem; font-weight: 700; text-align: right; }
+.rec-primary b { display: block; font-size: 2.1rem; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.05; }
+.rec-primary small { display: block; font-size: .72rem; color: var(--muted); margin-top: 4px; }
+.rec-del { width: 40px; height: 40px; border-radius: 10px; color: var(--text); border: 1px solid var(--line); font-size: 1.15rem; flex: none; }
+.rec-stats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 11px 0; }
+.rec-stats div { min-width: 0; text-align: center; }
+.rec-stats small { display: block; font-size: .65rem; color: var(--muted); letter-spacing: .04em; }
+.rec-stats b { display: block; font-size: clamp(.75rem, 3vw, 1rem); margin-top: 5px; font-variant-numeric: tabular-nums; }
+.rec-details { display: grid; gap: 10px; font-size: .82rem; }
+.rec-details div { line-height: 1.5; }
+.rec-details small { display: block; margin-left: 22px; color: var(--muted); overflow-wrap: anywhere; }
+.rec-note { display: flex; flex-direction: column; gap: 7px; font-size: .82rem; font-weight: 700; }
+.rec-note-input { display: flex; align-items: center; gap: 7px; }
+.rec-note input { flex: 1; min-width: 0; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; font-weight: 400; font-size: .82rem; }
+.rec-note input:focus { outline: 2px solid var(--accent-soft); }
+.note-count { flex: none; font-size: .7rem; color: var(--muted); font-weight: 400; }
+.rec-photo-section { display: flex; flex-direction: column; gap: 9px; border-top: 1px solid var(--line); padding-top: 12px; font-size: .84rem; }
+.rec-photo-preview { width: 100%; min-width: 0; }
+.rec-photo-open { display: block; width: 100%; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--bg); }
+.rec-photo-open img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: contain; }
+.rec-photo-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 9px; }
+.rec-photo-actions button, .rec-photo-add { padding: 10px 12px; border: 1px solid var(--accent-soft); border-radius: 11px; color: var(--accent); font-weight: 700; font-size: .8rem; }
+.rec-photo-actions [data-photo-remove] { color: var(--text); }
+.photo-sheet { max-height: 94dvh; }
+.photo-sheet img { display: block; width: 100%; max-height: 78dvh; object-fit: contain; border-radius: 12px; }
 .empty { text-align: center; color: var(--muted); padding: 48px 16px; line-height: 1.5; }
 .empty span { display: block; font-size: 2.4rem; margin-bottom: 8px; }
 
@@ -273,3 +290,25 @@ main { flex: 1; min-height: 0; position: relative; }
   #print-report thead { display: table-header-group; }
   #print-report .note { margin-top: 6mm; font-size: 8.5pt; color: #444; }
 }
+
+@media print {
+  #print-report .print-record { border: 1px solid #bbb; padding: 4mm; margin: 0 0 5mm; break-inside: avoid; page-break-inside: avoid; }
+  #print-report .print-record h2 { font-size: 12pt; color: #873ff3; margin-bottom: 2mm; }
+  #print-report .print-record p { margin-bottom: 1.5mm; font-size: 9pt; overflow-wrap: anywhere; }
+  #print-report .print-photo { display: block; max-width: 110mm; max-height: 110mm; width: auto; height: auto; object-fit: contain; margin: 3mm auto 0; }
+}
+
+/* ---------- COMPARTILHAMENTO E INSTALAÇÃO ---------- */
+.rec-share { padding: 11px 14px; background: var(--p); color: #fff; border-radius: 12px; font-weight: 750; text-align: center; width: 100%; }
+.share-sheet { max-height: 94dvh; }
+.share-privacy { display: flex; align-items: center; gap: 9px; font-size: .87rem; font-weight: 650; padding: 8px 0; }
+.share-privacy input { width: 18px; height: 18px; accent-color: var(--p); }
+.share-hint { font-size: .78rem; color: var(--muted); line-height: 1.45; margin-bottom: 10px; }
+.share-preview { display: grid; place-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 8px; }
+.share-preview img { width: 100%; max-width: 310px; max-height: 48dvh; object-fit: contain; border-radius: 8px; }
+.share-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.share-actions > button { flex: 1 1 140px; }
+.install-fab { position: fixed; z-index: 35; right: 14px; bottom: calc(82px + var(--safe-b)); padding: 13px 18px; background: var(--p); color: #fff; border: 1px solid var(--pm); border-radius: 999px; box-shadow: 0 5px 22px #0005; font-weight: 800; font-size: .85rem; }
+.install-fab:focus-visible, .rec-share:focus-visible { outline: 3px solid var(--pm); outline-offset: 3px; }
+.install-instructions { line-height: 1.6; padding: 10px 0; }
+@media print { .install-fab, #modal-share, #modal-install { display: none !important; } }
