@@ -87,6 +87,8 @@
     ? 'Localização indisponível'
     : `${r.lat.toFixed(5)}, ${r.lon.toFixed(5)}` + (r.acc != null ? ` (±${Math.round(r.acc)} m)` : '');
   const modeLabel = r => (MODES[r.mode] || MODES.cont).label;
+  const NOTE_MAX = 50;
+  const noteText = r => String(r.note || '').trim().slice(0, NOTE_MAX);
 
   /* ---------- Tema ---------- */
   function applyTheme(t) {
@@ -130,6 +132,10 @@
           <span class="muted">📍 ${esc(locText(r))}</span>
         </div>
         <button class="rec-del" data-del="${esc(r.id)}" aria-label="Excluir registro">🗑</button>
+        <div class="rec-note">
+          <input type="text" maxlength="${NOTE_MAX}" data-note="${esc(r.id)}" value="${esc(r.note || '')}" placeholder="Observação (até ${NOTE_MAX} caracteres)" aria-label="Observação do registro" enterkeyhint="done" autocomplete="off">
+          <span class="note-count">${String(r.note || '').length}/${NOTE_MAX}</span>
+        </div>
       </article>`;
     }).join('');
   }
@@ -322,6 +328,7 @@
       value, avg: round1(avg), min: round1(a.min), max: round1(a.max),
       level: classify(value).key,
       lat: loc.lat ?? null, lon: loc.lon ?? null, acc: loc.acc != null ? round1(loc.acc) : null,
+      note: '',
     };
     const list = load(); list.push(rec); save(list);
 
@@ -355,13 +362,13 @@
 
   function exportMD() {
     const l = needData(); if (!l) return;
-    const rows = l.map(r => `| ${fmtDate(r.ts)} | **${r.value}** | ${levelByKey(r.level).emoji} ${levelByKey(r.level).label} | ${modeLabel(r)} | ${r.min ?? '-'} / ${r.max ?? '-'} | ${locText(r)} |`);
+    const rows = l.map(r => `| ${fmtDate(r.ts)} | **${r.value}** | ${levelByKey(r.level).emoji} ${levelByKey(r.level).label} | ${modeLabel(r)} | ${r.min ?? '-'} / ${r.max ?? '-'} | ${locText(r)} | ${noteText(r).replace(/\|/g, '\\|') || '-'} |`);
     const md = [
       `# ${APP_NAME}`, '',
       `Relatório de medições — gerado em ${fmtDate(Date.now())}`, '',
       `Total de registros: **${l.length}**`, '',
-      '| Data/Hora | dB | Classificação | Modo | Mín / Máx | Localização |',
-      '|---|---|---|---|---|---|', ...rows, '',
+      '| Data/Hora | dB | Classificação | Modo | Mín / Máx | Localização | Observação |',
+      '|---|---|---|---|---|---|---|', ...rows, '',
       `> ${DISCLAIMER}`, '',
     ].join('\n');
     download(`shunfenger-${stamp()}.md`, new Blob([md], { type: 'text/markdown;charset=utf-8' }));
@@ -378,6 +385,7 @@
       `  Modo..........: ${modeLabel(r)} (${r.duration ?? '-'} s)`,
       `  Mín / Máx.....: ${r.min ?? '-'} / ${r.max ?? '-'} dB`,
       `  Localização...: ${locText(r)}`,
+      `  Observação....: ${noteText(r) || '-'}`,
     ].join('\n')).join('\n\n');
     const txt = `${APP_NAME.toUpperCase()}\nRelatório de medições — gerado em ${fmtDate(Date.now())}\nTotal: ${l.length}\n${'='.repeat(48)}\n\n${body}\n\n${'='.repeat(48)}\n${DISCLAIMER}\n`;
     download(`shunfenger-${stamp()}.txt`, new Blob([txt], { type: 'text/plain;charset=utf-8' }));
@@ -424,12 +432,12 @@
     const x = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
     const run = (t, o = {}) => `<w:r><w:rPr>${o.b ? '<w:b/>' : ''}${o.color ? `<w:color w:val="${o.color}"/>` : ''}<w:sz w:val="${o.sz || 20}"/></w:rPr><w:t xml:space="preserve">${x(t)}</w:t></w:r>`;
     const para = (t, o = {}) => `<w:p><w:pPr><w:spacing w:after="${o.after ?? 120}"/></w:pPr>${run(t, o)}</w:p>`;
-    const widths = [2300, 900, 2000, 1200, 1500, 5000];
+    const widths = [2200, 800, 1900, 1100, 1400, 3600, 3300];
     const cell = (t, w, o = {}) => `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${o.fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${o.fill}"/>` : ''}</w:tcPr><w:p><w:pPr><w:spacing w:after="0"/></w:pPr>${run(t, { sz: 18, b: o.b })}</w:p></w:tc>`;
-    const head = ['Data/Hora', 'dB', 'Classificação', 'Modo', 'Mín / Máx', 'Localização'];
+    const head = ['Data/Hora', 'dB', 'Classificação', 'Modo', 'Mín / Máx', 'Localização', 'Observação'];
     const trHead = `<w:tr><w:trPr><w:tblHeader/></w:trPr>${head.map((h, i) => cell(h, widths[i], { fill: 'E1CFFC', b: true })).join('')}</w:tr>`;
     const trs = l.map(r => `<w:tr>${[
-      fmtDate(r.ts), String(r.value), levelByKey(r.level).label, modeLabel(r), `${r.min ?? '-'} / ${r.max ?? '-'}`, locText(r),
+      fmtDate(r.ts), String(r.value), levelByKey(r.level).label, modeLabel(r), `${r.min ?? '-'} / ${r.max ?? '-'}`, locText(r), noteText(r) || '-',
     ].map((t, i) => cell(t, widths[i], { b: i === 1 })).join('')}</w:tr>`).join('');
     const bd = ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(s => `<w:${s} w:val="single" w:sz="4" w:space="0" w:color="873FF3"/>`).join('');
     const table = `<w:tbl><w:tblPr><w:tblW w:w="${widths.reduce((a, b) => a + b)}" w:type="dxa"/><w:tblBorders>${bd}</w:tblBorders><w:tblCellMar><w:left w:w="80" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr>${trHead}${trs}</w:tbl>`;
@@ -454,10 +462,10 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
 
   function printReport() {
     const l = needData(); if (!l) return;
-    const rows = l.map(r => `<tr><td>${esc(fmtDate(r.ts))}</td><td><b>${esc(r.value)}</b></td><td>${levelByKey(r.level).emoji} ${esc(levelByKey(r.level).label)}</td><td>${esc(modeLabel(r))}</td><td>${esc(r.min ?? '-')} / ${esc(r.max ?? '-')}</td><td>${esc(locText(r))}</td></tr>`).join('');
+    const rows = l.map(r => `<tr><td>${esc(fmtDate(r.ts))}</td><td><b>${esc(r.value)}</b></td><td>${levelByKey(r.level).emoji} ${esc(levelByKey(r.level).label)}</td><td>${esc(modeLabel(r))}</td><td>${esc(r.min ?? '-')} / ${esc(r.max ?? '-')}</td><td>${esc(locText(r))}</td><td>${esc(noteText(r) || '-')}</td></tr>`).join('');
     $('#print-report').innerHTML = `<h1>${esc(APP_NAME)}</h1>
       <p class="meta">Relatório de medições — gerado em ${esc(fmtDate(Date.now()))} · ${l.length} registro(s)</p>
-      <table><thead><tr><th>Data/Hora</th><th>dB</th><th>Classificação</th><th>Modo</th><th>Mín / Máx</th><th>Localização</th></tr></thead><tbody>${rows}</tbody></table>
+      <table><thead><tr><th>Data/Hora</th><th>dB</th><th>Classificação</th><th>Modo</th><th>Mín / Máx</th><th>Localização</th><th>Observação</th></tr></thead><tbody>${rows}</tbody></table>
       <p class="note">${esc(DISCLAIMER)}</p>`;
     setTimeout(() => window.print(), 150);
   }
@@ -477,6 +485,7 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
           level: r.level || classify(r.value).key,
           lat: typeof r.lat === 'number' ? r.lat : null, lon: typeof r.lon === 'number' ? r.lon : null,
           acc: typeof r.acc === 'number' ? r.acc : null,
+          note: typeof r.note === 'string' ? r.note.trim().slice(0, NOTE_MAX) : '',
         }));
         if (!valid.length) throw new Error('vazio');
         const cur = load(); const ids = new Set(cur.map(r => r.id));
@@ -509,6 +518,7 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
   /* ---------- Eventos ---------- */
   function bind() {
     $('#btn-theme').addEventListener('click', toggleTheme);
+    $('#brand-link').addEventListener('click', e => { e.preventDefault(); closeModals(); show('main'); });
     $('#btn-file').addEventListener('click', () => openModal('#modal-file'));
     $('#btn-main').addEventListener('click', onMainBtn);
     $('#banner-close').addEventListener('click', hideBanner);
@@ -527,6 +537,18 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
     $('#history-list').addEventListener('click', e => {
       const b = e.target.closest('[data-del]'); if (!b) return;
       save(load().filter(r => r.id !== b.dataset.del)); renderHistory(); toast('Registro excluído.');
+    });
+    $('#history-list').addEventListener('input', e => {
+      const inp = e.target.closest('[data-note]'); if (!inp) return;
+      const v = inp.value.slice(0, NOTE_MAX);
+      if (v !== inp.value) inp.value = v;
+      const cnt = inp.parentElement.querySelector('.note-count');
+      if (cnt) cnt.textContent = `${v.length}/${NOTE_MAX}`;
+      const list = load(); const rec = list.find(r => r.id === inp.dataset.note);
+      if (rec) { rec.note = v; save(list); }
+    });
+    $('#history-list').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.target.matches('[data-note]')) e.target.blur();
     });
     $('#btn-clear').addEventListener('click', () => {
       if (!load().length) return toast('Nada para apagar.');
