@@ -1,68 +1,164 @@
 /* =========================================================
-   Shunfenger Sound Level Meter — Service Worker (offline-first)
-   Estratégia: pré-cache do app shell + cache-first com
-   atualização em segundo plano (stale-while-revalidate).
-   Altere CACHE_VERSION a cada publicação para renovar o cache.
+   Shunfenger Sound Level Meter
+   Service Worker — versão 1.3.0
+
+   Estratégia:
+   - Pré-cache dos arquivos essenciais
+   - Cache dos recursos visuais disponíveis
+   - Funcionamento offline
+   - Atualização do cache em segundo plano
+   - Limpeza de versões antigas
    ========================================================= */
-const CACHE_VERSION = 'v1.1.0';
+
+'use strict';
+
+const CACHE_VERSION = 'v1.3.0';
 const CACHE_NAME = `shunfenger-${CACHE_VERSION}`;
 
-const APP_SHELL = [
+const CORE_FILES = [
   './',
   './index.html',
   './style.css',
   './app.js',
-  './manifest.json',
+  './manifest.json'
+];
+
+const OPTIONAL_FILES = [
   './logo.svg',
   './logo.png',
   './favicon.ico',
   './splash.png',
   './icon-192.png',
   './icon-512.png',
-  './icon-maskable-512.png',
+  './icon-maskable-512.png'
 ];
+
+/* ---------- INSTALAÇÃO ---------- */
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL.map(u => new Request(u, { cache: 'reload' }))))
-      .then(() => self.skipWaiting())
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+
+      // Os arquivos essenciais devem existir.
+      await cache.addAll(
+        CORE_FILES.map(url => new Request(url, {
+          cache: 'reload'
+        }))
+      );
+
+      // Recursos opcionais não bloqueiam a instalação.
+      await Promise.all(
+        OPTIONAL_FILES.map(async url => {
+          try {
+            await cache.add(
+              new Request(url, { cache: 'reload' })
+            );
+          } catch (error) {
+            // Arquivo opcional indisponível.
+          }
+        })
+      );
+
+      await self.skipWaiting();
+    })()
   );
 });
+
+/* ---------- ATIVAÇÃO ---------- */
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k.startsWith('shunfenger-') && k !== CACHE_NAME).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
+    (async () => {
+      const keys = await caches.keys();
+
+      await Promise.all(
+        keys
+          .filter(key =>
+            key.startsWith('shunfenger-') &&
+            key !== CACHE_NAME
+          )
+          .map(key => caches.delete(key))
+      );
+
+      await self.clients.claim();
+    })()
   );
 });
 
+/* ---------- REQUISIÇÕES ---------- */
+
 self.addEventListener('fetch', event => {
-  const req = event.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
+  const request = event.request;
+
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  const url = new URL(request.url);
+
+  // Não armazenar recursos de outros domínios.
+  if (url.origin !== self.location.origin) {
+    return;
+  }
 
   event.respondWith(
-    caches.match(req, { ignoreSearch: true }).then(cached => {
-      const network = fetch(req)
-        .then(res => {
-          if (res && res.ok) {
-            const copy = res.clone();
-            caches.open(CACHE_NAME).then(c => c.put(req, copy));
+    (async () => {
+      const cached = await caches.match(request, {
+        ignoreSearch: true
+      });
+
+      const network = fetch(request)
+        .then(async response => {
+          if (response && response.ok) {
+            try {
+              const cache = await caches.open(CACHE_NAME);
+
+              await cache.put(
+                request,
+                response.clone()
+              );
+            } catch (error) {
+              // Falhas de cache não bloqueiam a rede.
+            }
           }
-          return res;
+
+          return response;
         })
         .catch(() => null);
 
-      if (cached) { event.waitUntil(network); return cached; }
+      // Entrega rápida pelo cache, com atualização.
+      if (cached) {
+        event.waitUntil(network);
+        return cached;
+      }
 
-      return network.then(res => {
-        if (res) return res;
-        if (req.mode === 'navigate') return caches.match('./index.html');
-        return new Response('', { status: 504, statusText: 'Offline' });
-      });
-    })
+      // Sem cache: tentar a rede.
+      const response = await network;
+
+      if (response) {
+        return response;
+      }
+
+      // Navegação sem conexão.
+      if (request.mode === 'navigate') {
+        const fallback = await caches.match('./index.html');
+
+        if (fallback) {
+          return fallback;
+        }
+      }
+
+      return new Response(
+        'Recurso indisponível offline.',
+        {
+          status: 503,
+          statusText: 'Offline',
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8'
+          }
+        }
+      );
+    })()
   );
 });
