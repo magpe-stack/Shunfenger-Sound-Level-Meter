@@ -88,7 +88,8 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; justify-content: space-between; gap: 6px;
   padding: 10px 12px 8px;
 }
-.brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.brand { display: flex; align-items: center; gap: 8px; min-width: 0; color: inherit; cursor: pointer; }
+.brand:active { opacity: .7; }
 .brand svg { flex: none; border-radius: 8px; }
 .brand-name { display: flex; flex-direction: column; font-weight: 800; font-size: .95rem; line-height: 1.05; letter-spacing: .01em; }
 .brand-name small { font-weight: 500; font-size: .68rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
@@ -218,6 +219,11 @@ main { flex: 1; min-height: 0; position: relative; }
 .rec-info strong { font-size: .88rem; }
 .rec-info .muted { color: var(--muted); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rec-del { width: 34px; height: 34px; border-radius: 10px; color: var(--muted); border: 1px solid var(--line); }
+.rec-note { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
+.rec-note input { flex: 1; min-width: 0; padding: 9px 11px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; font-size: .82rem; }
+.rec-note input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent-soft); }
+.rec-note input::placeholder { color: var(--muted); }
+.note-count { flex: none; font-size: .68rem; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
 .empty { text-align: center; color: var(--muted); padding: 48px 16px; line-height: 1.5; }
 .empty span { display: block; font-size: 2.4rem; margin-bottom: 8px; }
 
@@ -262,7 +268,7 @@ main { flex: 1; min-height: 0; position: relative; }
   #print-report .meta { color: #333; margin-bottom: 5mm; }
   #print-report table { width: 100%; border-collapse: collapse; }
   #print-report th { background: #E1CFFC; color: #000; text-align: left; }
-  #print-report th, #print-report td { border: 1px solid #873ff3; padding: 2mm 2.4mm; vertical-align: top; }
+  #print-report th, #print-report td { border: 1px solid #873ff3; padding: 2mm 2.4mm; vertical-align: top; font-size: 9.5pt; }
   #print-report tr { page-break-inside: avoid; }
   #print-report thead { display: table-header-group; }
   #print-report .note { margin-top: 6mm; font-size: 8.5pt; color: #444; }
