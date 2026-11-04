@@ -181,34 +181,8 @@
       <li><button data-action="print">🖨️ <span>Imprimir / Salvar PDF</span></button></li>
       <li class="sep"></li>
       <li id="li-install" hidden><button data-action="install">📲 <span>Instalar aplicativo</span></button></li>
-      <li><button data-action="about">🌬️ <span>Sobre o Shunfenger</span></button></li>
     </ul>
     <input id="file-input" type="file" accept=".json,application/json" hidden>
-  </div>
-</div>
-
-<!-- ============ MODAL: SOBRE ============ -->
-<div id="modal-about" class="modal" hidden>
-  <div class="sheet" role="dialog" aria-modal="true" aria-label="Sobre">
-    <div class="sheet-head"><h3>Sobre o Shunfenger</h3><button class="icon-btn" data-close aria-label="Fechar">✕</button></div>
-    <div class="about">
-      <p class="poem"><b>順風耳 · Shunfeng'er</b><br>
-        “A Orelha que Acompanha o Vento”. Divindade celestial da mitologia chinesa,
-        guardião ao lado da deusa Mazu, capaz de ouvir qualquer som levado pelo vento.
-        Que este app seja um pouco dessa escuta: atento a cada ruído, a serviço do seu bem-estar auditivo.</p>
-
-      <h4>Calibração</h4>
-      <p class="muted">Microfones de celular não são calibrados de fábrica. Ajuste o deslocamento (offset) comparando com um sonômetro de referência. Valores são aproximados e não substituem equipamento certificado (IEC 61672).</p>
-      <div class="cal">
-        <label for="cal-input">Offset (dB)</label>
-        <input id="cal-input" type="number" step="0.5" inputmode="decimal">
-        <button id="cal-save" class="ghost-btn">Salvar</button>
-        <button id="cal-reset" class="ghost-btn">Padrão</button>
-      </div>
-
-      <a class="link-btn" href="https://github.com/magpe-stack/Shunfenger-Sound-Level-Meter/blob/main/README.md" target="_blank" rel="noopener">Abrir manual completo ↗</a>
-      <p class="muted small">Classificação: OMS e NR-15 · v1.2.0</p>
-    </div>
   </div>
 </div>
 
