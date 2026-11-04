@@ -69,7 +69,7 @@
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.200 2.600c-.9.5-1.400 1-1.400 2M12 17.300v.2"/></svg>
       </a>
       <button id="btn-file" class="icon-btn accent" aria-haspopup="dialog" aria-label="Menu Arquivo" title="Arquivo">
-        <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.500h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.500h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"/></svg>
       </button>
     </nav>
   </header>
@@ -80,7 +80,7 @@
   </div>
 
   <main>
-    <!-- ======== PÁGINA 1: MEDIÇÃO (sem rolagem) ======== -->
+    <!-- ======== PÁGINA 1: MEDIÇÃO ======== -->
     <section id="view-main" class="view">
       <div class="meter card" id="meter" data-level="idle">
         <div class="meter-top">
@@ -129,7 +129,7 @@
       </button>
     </section>
 
-    <!-- ======== PÁGINA 2: HISTÓRICO (com rolagem) ======== -->
+    <!-- ======== PÁGINA 2: HISTÓRICO ======== -->
     <section id="view-history" class="view" hidden>
       <div class="hist-head">
         <div>
@@ -175,6 +175,14 @@
   </div>
 </div>
 
+<input id="photo-input" type="file" accept="image/*" capture="environment" hidden>
+<div id="modal-photo" class="modal" hidden>
+  <div class="sheet photo-sheet" role="dialog" aria-modal="true" aria-label="Fotografia ampliada">
+    <div class="sheet-head"><h3>Fotografia da fonte do ruído</h3><button class="icon-btn" data-close aria-label="Fechar">✕</button></div>
+    <img id="photo-full" alt="Fotografia ampliada da fonte do ruído">
+  </div>
+</div>
+
 <!-- ============ MODAL: SOBRE ============ -->
 <div id="modal-about" class="modal" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-label="Sobre">
@@ -195,14 +203,50 @@
       </div>
 
       <a class="link-btn" href="https://github.com/magpe-stack/Shunfenger-Sound-Level-Meter/blob/main/README.md" target="_blank" rel="noopener">Abrir manual completo ↗</a>
-      <p class="muted small">Classificação: OMS e NR-15 · v1.1.0</p>
+      <p class="muted small">Classificação: OMS e NR-15 · v1.3.0</p>
     </div>
   </div>
 </div>
 
+<!-- ============ COMPARTILHAMENTO ============ -->
+<div id="modal-share" class="modal" hidden>
+  <div class="sheet share-sheet" role="dialog" aria-modal="true" aria-label="Compartilhar medição">
+    <div class="sheet-head">
+      <h3>Compartilhar medição</h3>
+      <button class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </div>
+    <label class="share-privacy">
+      <input id="share-location" type="checkbox">
+      Incluir coordenadas GPS na imagem
+    </label>
+    <p class="share-hint">Por privacidade, a localização fica oculta por padrão. A fotografia e a observação serão incluídas quando existirem.</p>
+    <div class="share-preview">
+      <img id="share-preview" alt="Prévia do cartão de medição para compartilhar">
+    </div>
+    <div class="share-actions">
+      <button id="share-native" class="link-btn" type="button">↗ Compartilhar imagem</button>
+      <button id="share-save" class="ghost-btn" type="button">↓ Salvar imagem</button>
+      <button id="share-copy" class="ghost-btn" type="button">Copiar texto e link</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ INSTALAÇÃO ============ -->
+<div id="modal-install" class="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Instalar Shunfenger">
+    <div class="sheet-head">
+      <h3>Instalar Shunfenger</h3>
+      <button class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </div>
+    <p id="install-instructions" class="install-instructions"></p>
+  </div>
+</div>
+
+<button id="install-fab" class="install-fab" type="button" hidden>↓ Instalar grátis</button>
+
 <div id="toast" class="toast" role="status" hidden></div>
 
-<!-- Área de impressão (visível apenas em @media print) -->
+<!-- Área de impressão -->
 <section id="print-report" hidden></section>
 
 <script src="app.js"></script>
