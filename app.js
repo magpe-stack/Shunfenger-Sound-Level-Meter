@@ -11,7 +11,6 @@
   /* ---------- Constantes ---------- */
   const KEY_REC   = 'shunfenger.records.v1';
   const KEY_THEME = 'shunfenger.theme.v1';
-  const KEY_CAL   = 'shunfenger.cal.v1';
   const APP_NAME  = 'Shunfenger Sound Level Meter';
   const DEFAULT_CAL = 100;
   const MAX_DB = 120;
@@ -31,8 +30,7 @@
     set(k, v) { try { localStorage.setItem(k, v); return true; } catch { return false; } },
   };
 
-  let cal = parseFloat(store.get(KEY_CAL));
-  if (!isFinite(cal)) cal = DEFAULT_CAL;
+  const cal = DEFAULT_CAL;
 
   /* ---------- Estado ---------- */
   const S = {
@@ -41,7 +39,7 @@
     timer: null, startTs: 0, t0: 0,
     smooth: 0, acc: null, locPromise: null, wake: null,
     installEvt: null,
-    currentPhotoBase64: null, // Armazena foto tirada antes/durante medição
+    currentPhotoBase64: null,
   };
 
   /* ---------- Utilidades ---------- */
@@ -183,7 +181,7 @@
     $$('.mode').forEach(x => { x.disabled = running; });
   }
 
-  /* ---------- Manipulação de Imagem / Câmera ---------- */
+  /* ---------- Câmera / Imagem ---------- */
   function handleCameraFile(file) {
     if (!file) return;
     const reader = new FileReader();
@@ -191,7 +189,7 @@
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const maxDim = 800; // Redimensiona para ser leve no localStorage
+        const maxDim = 800;
         let w = img.width, h = img.height;
         if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
         else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
@@ -201,7 +199,7 @@
         S.currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
         $('#photo-preview').src = S.currentPhotoBase64;
         $('#photo-preview-wrap').hidden = false;
-        toast('Foto da fonte anexada!');
+        toast('Foto anexada com sucesso!');
       };
       img.src = e.target.result;
     };
@@ -228,36 +226,36 @@
   }
   function locWarning(err) {
     const msgs = {
-      denied: 'Permissão de localização negada. A medição continua, mas o registro ficará sem Lat/Lon. Para ativar: ícone de cadeado na barra de endereço › Permissões › Localização.',
-      unsupported: 'Este navegador não oferece geolocalização. Os registros ficarão sem Lat/Lon.',
-      timeout: 'Não foi possível obter a localização a tempo. Verifique se o GPS está ligado.',
-      unavailable: 'Localização indisponível no momento. Verifique se o GPS está ligado.',
+      denied: 'Permissão de localização negada. O registro ficará sem Lat/Lon.',
+      unsupported: 'Este navegador não oferece geolocalização.',
+      timeout: 'Não foi possível obter a localização a tempo.',
+      unavailable: 'Localização indisponível no momento.',
     };
     banner(msgs[err] || msgs.unavailable);
   }
 
   /* ---------- Áudio / Medição ---------- */
   async function lockScreen() {
-    try { if ('wakeLock' in navigator) S.wake = await navigator.wakeLock.request('screen'); } catch { /* ignore */ }
+    try { if ('wakeLock' in navigator) S.wake = await navigator.wakeLock.request('screen'); } catch {}
   }
-  function unlockScreen() { try { S.wake && S.wake.release(); } catch { /* ignore */ } S.wake = null; }
+  function unlockScreen() { try { S.wake && S.wake.release(); } catch {} S.wake = null; }
 
   function micError(e) {
     const n = e && e.name;
     if (n === 'NotAllowedError' || n === 'SecurityError')
-      return 'Acesso ao microfone negado. Toque no cadeado ao lado do endereço › Permissões › Microfone › Permitir e tente novamente.';
+      return 'Acesso ao microfone negado.';
     if (n === 'NotFoundError' || n === 'OverconstrainedError')
-      return 'Nenhum microfone foi encontrado neste dispositivo.';
+      return 'Nenhum microfone encontrado.';
     if (n === 'NotReadableError')
-      return 'O microfone está em uso por outro aplicativo. Feche-o e tente novamente.';
-    return 'Não foi possível acessar o microfone (' + (n || 'erro desconhecido') + ').';
+      return 'O microfone está em uso por outro aplicativo.';
+    return 'Erro ao acessar o microfone (' + (n || 'desconhecido') + ').';
   }
 
   async function start() {
     if (S.running || S.saving) return;
     hideBanner();
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      banner('Este navegador não suporta captura de áudio, ou a página não está em HTTPS.');
+      banner('Navegador não suporta captura de áudio ou falta HTTPS.');
       return;
     }
     let stream;
@@ -280,14 +278,13 @@
       S.stream = stream;
     } catch (e) {
       stream.getTracks().forEach(t => t.stop());
-      banner('Falha ao iniciar o processamento de áudio.');
+      banner('Falha ao iniciar áudio.');
       return;
     }
 
     S.locPromise = getLocation();
     S.locPromise.then(r => { if (r.err) locWarning(r.err); });
 
-    // CORREÇÃO TÉCNICA: Inicialização do min em Infinity para não travar em 0.0
     S.acc = { sum: 0, n: 0, min: Infinity, max: -Infinity, last: 0 };
     S.smooth = 0;
     S.startTs = Date.now(); S.t0 = performance.now();
@@ -334,7 +331,7 @@
   function releaseAudio() {
     clearInterval(S.timer); S.timer = null;
     if (S.stream) S.stream.getTracks().forEach(t => t.stop());
-    if (S.ctx) { try { S.ctx.close(); } catch { /* ignore */ } }
+    if (S.ctx) { try { S.ctx.close(); } catch {} }
     S.stream = S.ctx = S.analyser = S.buf = null;
     unlockScreen();
   }
@@ -349,7 +346,7 @@
     $('#btn-main').disabled = true;
 
     if (a.n < 3) {
-      toast('Medição muito curta — nada foi salvo.');
+      toast('Medição muito curta — nada salvo.');
       resetDisplay(); S.saving = false; $('#btn-main').disabled = false; return;
     }
 
@@ -381,7 +378,7 @@
 
   function onMainBtn() { S.running ? stop() : start(); }
 
-  /* ---------- Download helper ---------- */
+  /* ---------- Downloads & Exportações ---------- */
   function download(name, blob) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -389,46 +386,26 @@
     setTimeout(() => URL.revokeObjectURL(url), 4000);
   }
   const stamp = () => { const d = new Date(); return `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}-${pad2(d.getHours())}${pad2(d.getMinutes())}`; };
-  const needData = () => { const l = sorted(); if (!l.length) { toast('Não há registros para exportar.'); return null; } return l; };
+  const needData = () => { const l = sorted(); if (!l.length) { toast('Não há registros.'); return null; } return l; };
 
-  /* ---------- Exportações ---------- */
   function exportJSON() {
     const l = needData(); if (!l) return;
-    const data = { app: APP_NAME, version: 1.2, exportedAt: new Date().toISOString(), records: l };
-    download(`shunfenger-${stamp()}.json`, new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+    download(`shunfenger-${stamp()}.json`, new Blob([JSON.stringify({ app: APP_NAME, version: 1.2, exportedAt: new Date().toISOString(), records: l }, null, 2)], { type: 'application/json' }));
     toast('JSON exportado.');
   }
 
   function exportMD() {
     const l = needData(); if (!l) return;
     const rows = l.map(r => `| ${fmtDate(r.ts)} | **${r.value}** | ${levelByKey(r.level).emoji} ${levelByKey(r.level).label} | ${modeLabel(r)} | ${r.min ?? '-'} / ${r.max ?? '-'} | ${locText(r)} | ${r.photo ? 'Sim' : 'Não'} | ${noteText(r).replace(/\|/g, '\\|') || '-'} |`);
-    const md = [
-      `# ${APP_NAME}`, '',
-      `Relatório de medições — gerado em ${fmtDate(Date.now())}`, '',
-      `Total de registros: **${l.length}**`, '',
-      '| Data/Hora | dB | Classificação | Modo | Mín / Máx | Localização | Foto | Observação |',
-      '|---|---|---|---|---|---|---|---|', ...rows, '',
-      `> ${DISCLAIMER}`, '',
-    ].join('\n');
+    const md = [`# ${APP_NAME}`, '', `Relatório — ${fmtDate(Date.now())}`, '', '| Data/Hora | dB | Classificação | Modo | Mín / Máx | Localização | Foto | Observação |', '|---|---|---|---|---|---|---|---|', ...rows, '', `> ${DISCLAIMER}`].join('\n');
     download(`shunfenger-${stamp()}.md`, new Blob([md], { type: 'text/markdown;charset=utf-8' }));
     toast('Markdown exportado.');
   }
 
   function exportTXT() {
     const l = needData(); if (!l) return;
-    const body = l.map((r, i) => [
-      `#${i + 1}`,
-      `  Data/Hora.....: ${fmtDate(r.ts)}`,
-      `  Valor.........: ${r.value} dB`,
-      `  Classificação.: ${levelByKey(r.level).label}`,
-      `  Modo..........: ${modeLabel(r)} (${r.duration ?? '-'} s)`,
-      `  Mín / Máx.....: ${r.min ?? '-'} / ${r.max ?? '-'} dB`,
-      `  Localização...: ${locText(r)}`,
-      `  Foto Anexa....: ${r.photo ? 'Sim' : 'Não'}`,
-      `  Observação....: ${noteText(r) || '-'}`,
-    ].join('\n')).join('\n\n');
-    const txt = `${APP_NAME.toUpperCase()}\nRelatório de medições — gerado em ${fmtDate(Date.now())}\nTotal: ${l.length}\n${'='.repeat(48)}\n\n${body}\n\n${'='.repeat(48)}\n${DISCLAIMER}\n`;
-    download(`shunfenger-${stamp()}.txt`, new Blob([txt], { type: 'text/plain;charset=utf-8' }));
+    const body = l.map((r, i) => `#${i + 1}\n  Data/Hora: ${fmtDate(r.ts)}\n  Valor: ${r.value} dB\n  Classificação: ${levelByKey(r.level).label}\n  Modo: ${modeLabel(r)}\n  Mín/Máx: ${r.min ?? '-'} / ${r.max ?? '-'} dB\n  Localização: ${locText(r)}\n  Foto: ${r.photo ? 'Sim' : 'Não'}\n  Obs: ${noteText(r) || '-'}`).join('\n\n');
+    download(`shunfenger-${stamp()}.txt`, new Blob([`${APP_NAME}\nRelatório — ${fmtDate(Date.now())}\n${'='.repeat(40)}\n\n${body}\n\n${DISCLAIMER}\n`], { type: 'text/plain;charset=utf-8' }));
     toast('TXT exportado.');
   }
 
@@ -476,9 +453,7 @@
     const cell = (t, w, o = {}) => `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${o.fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${o.fill}"/>` : ''}</w:tcPr><w:p><w:pPr><w:spacing w:after="0"/></w:pPr>${run(t, { sz: 18, b: o.b })}</w:p></w:tc>`;
     const head = ['Data/Hora', 'dB', 'Classificação', 'Modo', 'Mín / Máx', 'Localização', 'Observação'];
     const trHead = `<w:tr><w:trPr><w:tblHeader/></w:trPr>${head.map((h, i) => cell(h, widths[i], { fill: 'E1CFFC', b: true })).join('')}</w:tr>`;
-    const trs = l.map(r => `<w:tr>${[
-      fmtDate(r.ts), String(r.value), levelByKey(r.level).label, modeLabel(r), `${r.min ?? '-'} / ${r.max ?? '-'}`, locText(r), noteText(r) || '-',
-    ].map((t, i) => cell(t, widths[i], { b: i === 1 })).join('')}</w:tr>`).join('');
+    const trs = l.map(r => `<w:tr>${[fmtDate(r.ts), String(r.value), levelByKey(r.level).label, modeLabel(r), `${r.min ?? '-'} / ${r.max ?? '-'}`, locText(r), noteText(r) || '-'].map((t, i) => cell(t, widths[i], { b: i === 1 })).join('')}</w:tr>`).join('');
     const bd = ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(s => `<w:${s} w:val="single" w:sz="4" w:space="0" w:color="873FF3"/>`).join('');
     const table = `<w:tbl><w:tblPr><w:tblW w:w="${widths.reduce((a, b) => a + b)}" w:type="dxa"/><w:tblBorders>${bd}</w:tblBorders><w:tblCellMar><w:left w:w="80" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr>${trHead}${trs}</w:tbl>`;
 
@@ -491,34 +466,18 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
 <w:sectPr><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/><w:pgMar w:top="1000" w:right="1000" w:bottom="1000" w:left="1000" w:header="500" w:footer="500" w:gutter="0"/></w:sectPr>
 </w:body></w:document>`;
 
-    const blob = makeZip([
+    download(`shunfenger-${stamp()}.docx`, makeZip([
       { name: '[Content_Types].xml', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>' },
       { name: '_rels/.rels', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>' },
       { name: 'word/document.xml', text: doc },
-    ]);
-    download(`shunfenger-${stamp()}.docx`, blob);
+    ]));
     toast('DOCX exportado.');
   }
 
   function printReport() {
     const l = needData(); if (!l) return;
-    const rows = l.map(r => {
-      const img = r.photo ? `<br><img src="${r.photo}" style="max-width:120px;max-height:90px;border-radius:4px;margin-top:4px;">` : '';
-      return `<tr>
-        <td>${esc(fmtDate(r.ts))}</td>
-        <td><b>${esc(r.value)}</b></td>
-        <td>${levelByKey(r.level).emoji} ${esc(levelByKey(r.level).label)}</td>
-        <td>${esc(modeLabel(r))}</td>
-        <td>${esc(r.min ?? '-')} / ${esc(r.max ?? '-')}</td>
-        <td>${esc(locText(r))}</td>
-        <td>${esc(noteText(r) || '-')}${img}</td>
-      </tr>`;
-    }).join('');
-
-    $('#print-report').innerHTML = `<h1>${esc(APP_NAME)}</h1>
-      <p class="meta">Relatório de medições — gerado em ${esc(fmtDate(Date.now()))} · ${l.length} registro(s)</p>
-      <table><thead><tr><th>Data/Hora</th><th>dB</th><th>Classificação</th><th>Modo</th><th>Mín / Máx</th><th>Localização</th><th>Observação / Foto</th></tr></thead><tbody>${rows}</tbody></table>
-      <p class="note">${esc(DISCLAIMER)}</p>`;
+    const rows = l.map(r => `<tr><td>${esc(fmtDate(r.ts))}</td><td><b>${esc(r.value)}</b></td><td>${levelByKey(r.level).emoji} ${esc(levelByKey(r.level).label)}</td><td>${esc(modeLabel(r))}</td><td>${esc(r.min ?? '-')} / ${esc(r.max ?? '-')}</td><td>${esc(locText(r))}</td><td>${esc(noteText(r) || '-')}${r.photo ? `<br><img src="${r.photo}" style="max-width:120px;max-height:90px;border-radius:4px;margin-top:4px;">` : ''}</td></tr>`).join('');
+    $('#print-report').innerHTML = `<h1>${esc(APP_NAME)}</h1><p>Relatório de medições — ${esc(fmtDate(Date.now()))} · ${l.length} registro(s)</p><table><thead><tr><th>Data/Hora</th><th>dB</th><th>Classificação</th><th>Modo</th><th>Mín / Máx</th><th>Localização</th><th>Observação / Foto</th></tr></thead><tbody>${rows}</tbody></table><p>${esc(DISCLAIMER)}</p>`;
     setTimeout(() => window.print(), 150);
   }
 
@@ -530,7 +489,7 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
       try {
         const data = JSON.parse(rd.result);
         const arr = Array.isArray(data) ? data : data.records;
-        if (!Array.isArray(arr)) throw new Error('formato');
+        if (!Array.isArray(arr)) throw new Error();
         const valid = arr.filter(r => r && typeof r.ts === 'number' && typeof r.value === 'number').map(r => ({
           id: String(r.id || uid()), ts: r.ts, mode: MODES[r.mode] ? r.mode : 'cont', duration: r.duration ?? null,
           value: r.value, avg: r.avg ?? r.value, min: r.min ?? null, max: r.max ?? null,
@@ -540,35 +499,33 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
           note: typeof r.note === 'string' ? r.note.trim().slice(0, NOTE_MAX) : '',
           photo: typeof r.photo === 'string' ? r.photo : null,
         }));
-        if (!valid.length) throw new Error('vazio');
+        if (!valid.length) throw new Error();
         const cur = load(); const ids = new Set(cur.map(r => r.id));
         let added = 0;
         valid.forEach(r => { if (!ids.has(r.id)) { cur.push(r); ids.add(r.id); added++; } });
         save(cur); renderHistory();
-        toast(`${added} registro(s) importado(s)` + (valid.length - added ? `, ${valid.length - added} já existiam.` : '.'));
-      } catch { toast('Arquivo inválido. Use um JSON exportado por este app.'); }
+        toast(`${added} registro(s) importado(s).`);
+      } catch { toast('Arquivo inválido.'); }
     };
     rd.readAsText(file);
   }
 
-  /* ---------- Modais ---------- */
-  const openModal  = id => { $(id).hidden = false; };
+  /* ---------- Modais & Eventos ---------- */
+  const openModal = id => { $(id).hidden = false; };
   const closeModals = () => $$('.modal').forEach(m => { m.hidden = true; });
 
   function menuAction(a) {
-    if (a === 'about') { closeModals(); $('#cal-input').value = cal; openModal('#modal-about'); return; }
     if (a === 'import') { $('#file-input').click(); return; }
     closeModals();
-    if (a === 'new')     { show('main'); if (!S.running) start(); }
-    else if (a === 'json')  exportJSON();
-    else if (a === 'md')    exportMD();
-    else if (a === 'txt')   exportTXT();
-    else if (a === 'docx')  exportDOCX();
+    if (a === 'new') show('main');
+    else if (a === 'json') exportJSON();
+    else if (a === 'md') exportMD();
+    else if (a === 'txt') exportTXT();
+    else if (a === 'docx') exportDOCX();
     else if (a === 'print') printReport();
     else if (a === 'install' && S.installEvt) { S.installEvt.prompt(); S.installEvt = null; $('#li-install').hidden = true; }
   }
 
-  /* ---------- Eventos ---------- */
   function bind() {
     $('#btn-theme').addEventListener('click', toggleTheme);
     $('#brand-link').addEventListener('click', e => { e.preventDefault(); closeModals(); show('main'); });
@@ -578,12 +535,8 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
     $$('.mode').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
     $$('.tab').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
 
-    // Eventos de Câmera
     $('#btn-camera').addEventListener('click', () => $('#camera-input').click());
-    $('#camera-input').addEventListener('change', e => {
-      const f = e.target.files[0];
-      if (f) handleCameraFile(f);
-    });
+    $('#camera-input').addEventListener('change', e => { if (e.target.files[0]) handleCameraFile(e.target.files[0]); });
     $('#btn-photo-remove').addEventListener('click', clearPhoto);
 
     $$('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m || e.target.closest('[data-close]')) closeModals(); }));
@@ -608,30 +561,14 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
       const list = load(); const rec = list.find(r => r.id === inp.dataset.note);
       if (rec) { rec.note = v; save(list); }
     });
-    $('#history-list').addEventListener('keydown', e => {
-      if (e.key === 'Enter' && e.target.matches('[data-note]')) e.target.blur();
-    });
     $('#btn-clear').addEventListener('click', () => {
       if (!load().length) return toast('Nada para apagar.');
-      if (confirm('Apagar TODOS os registros? Essa ação não pode ser desfeita.')) { save([]); renderHistory(); toast('Histórico apagado.'); }
+      if (confirm('Apagar TODOS os registros?')) { save([]); renderHistory(); toast('Histórico apagado.'); }
     });
-
-    $('#cal-save').addEventListener('click', () => {
-      const v = parseFloat($('#cal-input').value);
-      if (!isFinite(v) || v < 40 || v > 160) return toast('Informe um offset entre 40 e 160.');
-      cal = v; store.set(KEY_CAL, String(v)); toast('Calibração salva.');
-    });
-    $('#cal-reset').addEventListener('click', () => {
-      cal = DEFAULT_CAL; store.set(KEY_CAL, String(cal)); $('#cal-input').value = cal; toast('Calibração restaurada.');
-    });
-
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.running) lockScreen(); });
 
     window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); S.installEvt = e; $('#li-install').hidden = false; });
-    window.addEventListener('appinstalled', () => { $('#li-install').hidden = true; toast('Aplicativo instalado!'); });
   }
 
-  /* ---------- Boot ---------- */
   function boot() {
     bind(); renderHistory(); resetDisplay();
     const sp = $('#splash');
