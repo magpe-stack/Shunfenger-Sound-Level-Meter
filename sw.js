@@ -4,7 +4,7 @@
    atualização em segundo plano (stale-while-revalidate).
    Altere CACHE_VERSION a cada publicação para renovar o cache.
    ========================================================= */
-const CACHE_VERSION = 'v1.2.0';
+const CACHE_VERSION = 'v1.3.0';
 const CACHE_NAME = `shunfenger-${CACHE_VERSION}`;
 
 const APP_SHELL = [
