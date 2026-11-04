@@ -13,8 +13,8 @@
   const KEY_THEME = 'shunfenger.theme.v1';
   const KEY_CAL   = 'shunfenger.cal.v1';
   const APP_NAME  = 'Shunfenger Sound Level Meter';
-  const DEFAULT_CAL = 100;       // offset dBFS -> dB SPL aproximado (ajustável)
-  const MAX_DB = 120;            // fundo de escala da barra
+  const DEFAULT_CAL = 100;
+  const MAX_DB = 120;
   const TICK_MS = 100;
   const DISCLAIMER = 'Medições aproximadas feitas com o microfone do smartphone; não substituem sonômetro calibrado (IEC 61672).';
 
@@ -41,6 +41,7 @@
     timer: null, startTs: 0, t0: 0,
     smooth: 0, acc: null, locPromise: null, wake: null,
     installEvt: null,
+    currentPhotoBase64: null, // Armazena foto tirada antes/durante medição
   };
 
   /* ---------- Utilidades ---------- */
@@ -123,6 +124,7 @@
     box.innerHTML = list.map(r => {
       const lv = levelByKey(r.level);
       const mm = (r.min != null && r.max != null) ? ` · mín ${r.min} / máx ${r.max}` : '';
+      const photoHtml = r.photo ? `<div class="rec-photo"><img src="${r.photo}" alt="Fonte do ruído"></div>` : '';
       return `<article class="rec">
         <div class="rec-db"><b>${esc(r.value)}</b><small>dB</small></div>
         <div class="rec-info">
@@ -131,6 +133,7 @@
           <span class="muted">${esc(modeLabel(r))}${esc(mm)}</span>
           <span class="muted">📍 ${esc(locText(r))}</span>
         </div>
+        ${photoHtml}
         <button class="rec-del" data-del="${esc(r.id)}" aria-label="Excluir registro">🗑</button>
         <div class="rec-note">
           <input type="text" maxlength="${NOTE_MAX}" data-note="${esc(r.id)}" value="${esc(r.note || '')}" placeholder="Observação (até ${NOTE_MAX} caracteres)" aria-label="Observação do registro" enterkeyhint="done" autocomplete="off">
@@ -149,9 +152,9 @@
     $('#level-text').textContent = lv.label;
     $('#meter').dataset.level = lv.key;
     if (stats) {
-      $('#st-min').textContent = stats.min.toFixed(1);
+      $('#st-min').textContent = isFinite(stats.min) ? stats.min.toFixed(1) : '--';
       $('#st-avg').textContent = stats.avg.toFixed(1);
-      $('#st-max').textContent = stats.max.toFixed(1);
+      $('#st-max').textContent = isFinite(stats.max) ? stats.max.toFixed(1) : '--';
     }
   }
   function resetDisplay() {
@@ -180,7 +183,39 @@
     $$('.mode').forEach(x => { x.disabled = running; });
   }
 
-  /* ---------- Geolocalização (real) ---------- */
+  /* ---------- Manipulação de Imagem / Câmera ---------- */
+  function handleCameraFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 800; // Redimensiona para ser leve no localStorage
+        let w = img.width, h = img.height;
+        if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+        else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        S.currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        $('#photo-preview').src = S.currentPhotoBase64;
+        $('#photo-preview-wrap').hidden = false;
+        toast('Foto da fonte anexada!');
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearPhoto() {
+    S.currentPhotoBase64 = null;
+    $('#photo-preview').src = '';
+    $('#photo-preview-wrap').hidden = true;
+    $('#camera-input').value = '';
+  }
+
+  /* ---------- Geolocalização ---------- */
   function getLocation() {
     return new Promise(resolve => {
       if (!('geolocation' in navigator)) return resolve({ err: 'unsupported' });
@@ -201,7 +236,7 @@
     banner(msgs[err] || msgs.unavailable);
   }
 
-  /* ---------- Áudio / medição (real) ---------- */
+  /* ---------- Áudio / Medição ---------- */
   async function lockScreen() {
     try { if ('wakeLock' in navigator) S.wake = await navigator.wakeLock.request('screen'); } catch { /* ignore */ }
   }
@@ -252,6 +287,7 @@
     S.locPromise = getLocation();
     S.locPromise.then(r => { if (r.err) locWarning(r.err); });
 
+    // CORREÇÃO TÉCNICA: Inicialização do min em Infinity para não travar em 0.0
     S.acc = { sum: 0, n: 0, min: Infinity, max: -Infinity, last: 0 };
     S.smooth = 0;
     S.startTs = Date.now(); S.t0 = performance.now();
@@ -271,7 +307,6 @@
     const dbfs = 20 * Math.log10(Math.max(rms, 1e-9));
     const inst = Math.max(0, Math.min(140, dbfs + cal));
 
-    // suavização por energia (aprox. ponderação temporal "Fast")
     const e = Math.pow(10, inst / 10);
     S.smooth = S.smooth ? 0.4 * e + 0.6 * S.smooth : e;
     const db = 10 * Math.log10(S.smooth);
@@ -325,16 +360,20 @@
 
     const rec = {
       id: uid(), ts: startTs, mode, duration,
-      value, avg: round1(avg), min: round1(a.min), max: round1(a.max),
+      value, avg: round1(avg),
+      min: isFinite(a.min) ? round1(a.min) : round1(value),
+      max: isFinite(a.max) ? round1(a.max) : round1(value),
       level: classify(value).key,
       lat: loc.lat ?? null, lon: loc.lon ?? null, acc: loc.acc != null ? round1(loc.acc) : null,
       note: '',
+      photo: S.currentPhotoBase64 || null,
     };
     const list = load(); list.push(rec); save(list);
 
-    setDisplay(value, { min: a.min, avg, max: a.max });
+    setDisplay(value, { min: rec.min, avg, max: rec.max });
     $('#meter-timer').textContent = 'Salvo ✔';
     $('#progress').hidden = true;
+    clearPhoto();
     renderHistory();
     toast(`Registro salvo: ${value.toFixed(1)} dB`);
     S.saving = false; $('#btn-main').disabled = false;
@@ -355,20 +394,20 @@
   /* ---------- Exportações ---------- */
   function exportJSON() {
     const l = needData(); if (!l) return;
-    const data = { app: APP_NAME, version: 1, exportedAt: new Date().toISOString(), records: l };
+    const data = { app: APP_NAME, version: 1.2, exportedAt: new Date().toISOString(), records: l };
     download(`shunfenger-${stamp()}.json`, new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
     toast('JSON exportado.');
   }
 
   function exportMD() {
     const l = needData(); if (!l) return;
-    const rows = l.map(r => `| ${fmtDate(r.ts)} | **${r.value}** | ${levelByKey(r.level).emoji} ${levelByKey(r.level).label} | ${modeLabel(r)} | ${r.min ?? '-'} / ${r.max ?? '-'} | ${locText(r)} | ${noteText(r).replace(/\|/g, '\\|') || '-'} |`);
+    const rows = l.map(r => `| ${fmtDate(r.ts)} | **${r.value}** | ${levelByKey(r.level).emoji} ${levelByKey(r.level).label} | ${modeLabel(r)} | ${r.min ?? '-'} / ${r.max ?? '-'} | ${locText(r)} | ${r.photo ? 'Sim' : 'Não'} | ${noteText(r).replace(/\|/g, '\\|') || '-'} |`);
     const md = [
       `# ${APP_NAME}`, '',
       `Relatório de medições — gerado em ${fmtDate(Date.now())}`, '',
       `Total de registros: **${l.length}**`, '',
-      '| Data/Hora | dB | Classificação | Modo | Mín / Máx | Localização | Observação |',
-      '|---|---|---|---|---|---|---|', ...rows, '',
+      '| Data/Hora | dB | Classificação | Modo | Mín / Máx | Localização | Foto | Observação |',
+      '|---|---|---|---|---|---|---|---|', ...rows, '',
       `> ${DISCLAIMER}`, '',
     ].join('\n');
     download(`shunfenger-${stamp()}.md`, new Blob([md], { type: 'text/markdown;charset=utf-8' }));
@@ -385,6 +424,7 @@
       `  Modo..........: ${modeLabel(r)} (${r.duration ?? '-'} s)`,
       `  Mín / Máx.....: ${r.min ?? '-'} / ${r.max ?? '-'} dB`,
       `  Localização...: ${locText(r)}`,
+      `  Foto Anexa....: ${r.photo ? 'Sim' : 'Não'}`,
       `  Observação....: ${noteText(r) || '-'}`,
     ].join('\n')).join('\n\n');
     const txt = `${APP_NAME.toUpperCase()}\nRelatório de medições — gerado em ${fmtDate(Date.now())}\nTotal: ${l.length}\n${'='.repeat(48)}\n\n${body}\n\n${'='.repeat(48)}\n${DISCLAIMER}\n`;
@@ -392,7 +432,7 @@
     toast('TXT exportado.');
   }
 
-  /* --- DOCX (gerado do zero, sem bibliotecas: ZIP "store" + OOXML) --- */
+  /* --- DOCX (ZIP store + OOXML) --- */
   const CRC_T = (() => {
     const t = new Uint32Array(256);
     for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
@@ -462,10 +502,22 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
 
   function printReport() {
     const l = needData(); if (!l) return;
-    const rows = l.map(r => `<tr><td>${esc(fmtDate(r.ts))}</td><td><b>${esc(r.value)}</b></td><td>${levelByKey(r.level).emoji} ${esc(levelByKey(r.level).label)}</td><td>${esc(modeLabel(r))}</td><td>${esc(r.min ?? '-')} / ${esc(r.max ?? '-')}</td><td>${esc(locText(r))}</td><td>${esc(noteText(r) || '-')}</td></tr>`).join('');
+    const rows = l.map(r => {
+      const img = r.photo ? `<br><img src="${r.photo}" style="max-width:120px;max-height:90px;border-radius:4px;margin-top:4px;">` : '';
+      return `<tr>
+        <td>${esc(fmtDate(r.ts))}</td>
+        <td><b>${esc(r.value)}</b></td>
+        <td>${levelByKey(r.level).emoji} ${esc(levelByKey(r.level).label)}</td>
+        <td>${esc(modeLabel(r))}</td>
+        <td>${esc(r.min ?? '-')} / ${esc(r.max ?? '-')}</td>
+        <td>${esc(locText(r))}</td>
+        <td>${esc(noteText(r) || '-')}${img}</td>
+      </tr>`;
+    }).join('');
+
     $('#print-report').innerHTML = `<h1>${esc(APP_NAME)}</h1>
       <p class="meta">Relatório de medições — gerado em ${esc(fmtDate(Date.now()))} · ${l.length} registro(s)</p>
-      <table><thead><tr><th>Data/Hora</th><th>dB</th><th>Classificação</th><th>Modo</th><th>Mín / Máx</th><th>Localização</th><th>Observação</th></tr></thead><tbody>${rows}</tbody></table>
+      <table><thead><tr><th>Data/Hora</th><th>dB</th><th>Classificação</th><th>Modo</th><th>Mín / Máx</th><th>Localização</th><th>Observação / Foto</th></tr></thead><tbody>${rows}</tbody></table>
       <p class="note">${esc(DISCLAIMER)}</p>`;
     setTimeout(() => window.print(), 150);
   }
@@ -486,6 +538,7 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
           lat: typeof r.lat === 'number' ? r.lat : null, lon: typeof r.lon === 'number' ? r.lon : null,
           acc: typeof r.acc === 'number' ? r.acc : null,
           note: typeof r.note === 'string' ? r.note.trim().slice(0, NOTE_MAX) : '',
+          photo: typeof r.photo === 'string' ? r.photo : null,
         }));
         if (!valid.length) throw new Error('vazio');
         const cur = load(); const ids = new Set(cur.map(r => r.id));
@@ -524,6 +577,14 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
     $('#banner-close').addEventListener('click', hideBanner);
     $$('.mode').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
     $$('.tab').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
+
+    // Eventos de Câmera
+    $('#btn-camera').addEventListener('click', () => $('#camera-input').click());
+    $('#camera-input').addEventListener('change', e => {
+      const f = e.target.files[0];
+      if (f) handleCameraFile(f);
+    });
+    $('#btn-photo-remove').addEventListener('click', clearPhoto);
 
     $$('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m || e.target.closest('[data-close]')) closeModals(); }));
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
@@ -570,7 +631,7 @@ ${para(DISCLAIMER, { sz: 16, color: '555555', after: 0 }).replace('<w:spacing w:
     window.addEventListener('appinstalled', () => { $('#li-install').hidden = true; toast('Aplicativo instalado!'); });
   }
 
-  /* ---------- Splash (exatamente 1 s) + Service Worker ---------- */
+  /* ---------- Boot ---------- */
   function boot() {
     bind(); renderHistory(); resetDisplay();
     const sp = $('#splash');
