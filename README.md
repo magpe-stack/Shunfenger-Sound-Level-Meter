@@ -1,3 +1,4 @@
+
 # 🌬️ Shunfenger Sound Level Meter
 
 > **順風耳 · Shunfeng'er — "A Orelha que Acompanha o Vento"**
@@ -8,7 +9,6 @@
 
 🔗 **App online:** <https://magpe-stack.github.io/Shunfenger-Sound-Level-Meter/>
 📦 **Repositório:** <https://github.com/magpe-stack/Shunfenger-Sound-Level-Meter>
-
 
 ![Ilustração de Capa do Aplicativo Decibelímetro](Shunfengercover.png)
 
@@ -22,7 +22,7 @@
 4. [A tela principal](#4-a-tela-principal)
 5. [Como fazer uma medição](#5-como-fazer-uma-medição)
 6. [Classificação de saúde auditiva](#6-classificação-de-saúde-auditiva)
-7. [Histórico e observações](#7-histórico-e-observações)
+7. [Histórico, observações e fotografias](#7-histórico-observações-e-fotografias)
 8. [O menu Arquivo](#8-o-menu-arquivo)
 9. [Exportação, relatórios e backup](#9-exportação-relatórios-e-backup)
 10. [Calibração e precisão](#10-calibração-e-precisão)
@@ -34,6 +34,8 @@
 16. [Referência técnica](#16-referência-técnica)
 17. [Estrutura do repositório e publicação](#17-estrutura-do-repositório-e-publicação)
 18. [Aviso importante](#18-aviso-importante)
+19. [Compartilhamento de cartões de medição](#19-compartilhamento-de-cartões-de-medição)
+20. [Novidades da versão 1.3 e checklist de testes](#20-novidades-da-versão-13-e-checklist-de-testes)
 
 ---
 
@@ -48,8 +50,12 @@ O Shunfenger mede o nível de pressão sonora do ambiente usando o microfone do 
 - Valores **mínimo**, **médio** e **máximo** de cada medição.
 - Classificação em quatro faixas (Seguro, Moderado, Alto e Crítico).
 - Histórico salvo no próprio aparelho, com exclusão e campo de observação de até 50 caracteres.
+- Fotografia opcional vinculada a cada medição, armazenada localmente.
+- Compartilhamento individual de medições em cartão PNG vertical de **1080 × 1350 pixels**, com fotografia opcional.
+- Opção de incluir coordenadas GPS no cartão, **desativada por padrão**.
+- Botão flutuante **Instalar grátis**, com instalação nativa quando disponível ou orientações para o navegador.
 - Exportação em **JSON, Markdown, TXT e DOCX**, além de **impressão / PDF** em folha A4.
-- Importação de backups em JSON.
+- Importação de backups JSON, incluindo a recuperação das fotografias incorporadas ao arquivo.
 - Modo claro e modo escuro.
 - Funciona **offline** depois do primeiro acesso e pode ser **instalado** como aplicativo.
 
@@ -66,6 +72,16 @@ O Shunfenger mede o nível de pressão sonora do ambiente usando o microfone do 
 - Endereço em **HTTPS**. O app publicado no GitHub Pages já atende a esse requisito, e o navegador só libera microfone e localização em páginas seguras.
 - GPS ligado, se quiser registrar a localização.
 
+### Botão flutuante de instalação
+
+Na versão 1.3, há um botão **Instalar grátis** sobre a interface quando o aplicativo não está em execução como PWA instalado. Ao tocá-lo:
+
+- Se o navegador disponibilizar o convite nativo de instalação, ele será exibido.
+- Se não houver convite nativo, o aplicativo apresenta orientações para instalar manualmente.
+- Se o aplicativo já estiver aberto no modo instalado, o botão não aparece.
+
+A disponibilidade da instalação depende do navegador, do sistema e dos critérios de instalação do PWA.
+
 ### Instalar no celular (Chrome para Android)
 
 1. Abra <https://magpe-stack.github.io/Shunfenger-Sound-Level-Meter/> no Chrome.
@@ -75,6 +91,10 @@ O Shunfenger mede o nível de pressão sonora do ambiente usando o microfone do 
 3. Confirme. O ícone do Shunfenger aparece na tela inicial e o app abre em tela cheia, sem barra de endereço.
 
 > Se a opção de instalar não aparecer, abra o menu ⋮ do Chrome e procure "Instalar app". Ela pode não aparecer se o app já estiver instalado.
+
+### Instalação no iPhone e iPad
+
+Abra o endereço oficial no Safari, toque em **Compartilhar** e procure **Adicionar à Tela de Início**. O nome e a posição dos comandos podem variar conforme a versão do iOS/iPadOS.
 
 ### Abertura do app
 
@@ -217,84 +237,100 @@ A NR-15 (Anexo 1) fixa **85 dB(A)** como limite de exposição para uma jornada 
 
 ---
 
-## 7. Histórico e observações
+## 7. Histórico, observações e fotografias
 
-Toque em **Histórico** na barra inferior. Esta tela tem **rolagem** e lista os registros do mais recente ao mais antigo.
+Toque em **Histórico** na barra inferior. A lista apresenta as medições salvas, normalmente da mais recente para a mais antiga, e pode ser percorrida com rolagem.
 
-### Cada cartão mostra
+### Informações de cada cartão
 
-- **Valor em dB** em destaque.
-- **Classificação** com emoji.
-- **Data e hora** da medição.
-- **Modo** e valores **mín / máx**.
-- **📍 Localização:** latitude e longitude com 5 casas decimais e a precisão estimada, por exemplo `-23.55052, -46.63331 (±12 m)`. Sem localização, aparece "Localização indisponível".
-- **Campo de observação.**
-- **🗑 Botão de excluir.**
+Cada registro reúne o nível sonoro em dB, classificação, data e hora, modo, duração, valores mínimo/médio/máximo, localização quando disponível e uma observação. A versão 1.3 acrescenta ações de **fotografia** e **compartilhamento**.
 
-### Campo de observação
+### Observações
 
-- Escreva uma nota curta sobre aquele registro, de até **50 caracteres** (por exemplo: "Sala de aula, janela aberta").
-- Um contador (`12/50`) mostra quantos caracteres você já usou.
-- O texto é **salvo automaticamente** enquanto você digita; não há botão de salvar. Toque em **Enter** no teclado para fechá-lo.
-- A observação é incluída em todas as exportações e na impressão.
+O campo aceita até **50 caracteres**, com contador visual. A observação é salva localmente durante a digitação e aparece nos relatórios e no cartão compartilhável. Uma observação longa pode ser abreviada visualmente na imagem para caber no layout.
 
-### Excluir
+### Adicionar ou substituir fotografia
 
-- **🗑 no cartão:** exclui apenas aquele registro, sem pedir confirmação.
-- **Apagar tudo** (canto superior direito da tela): apaga **todos** os registros, com uma confirmação antes. **Não dá para desfazer.** Exporte um JSON antes se quiser guardar uma cópia.
+1. Abra o **Histórico** e localize a medição desejada.
+2. Toque na ação para **adicionar fotografia**.
+3. Escolha uma imagem do dispositivo.
+4. Aguarde o processamento e a gravação.
+5. O cartão do histórico passa a exibir a fotografia ou sua prévia.
+
+Você pode abrir a imagem para visualizá-la, substituí-la por outra ou removê-la sem apagar a medição. As imagens são processadas para reduzir o tamanho antes do armazenamento.
+
+**Onde a fotografia fica guardada?** No **IndexedDB** do navegador, separadamente dos dados numéricos do histórico, que ficam no `localStorage`. A fotografia é vinculada ao identificador da medição.
+
+### Excluir um registro ou apagar tudo
+
+A exclusão de um cartão solicita confirmação e remove também a fotografia vinculada. **Apagar tudo** solicita confirmação e exclui os registros e as fotografias associadas. A operação não pode ser desfeita; faça backup antes.
+
+### Compartilhar uma medição
+
+Use o botão de compartilhamento do cartão para abrir a prévia de uma imagem PNG com as informações da medição. O procedimento completo está na [seção 19](#19-compartilhamento-de-cartões-de-medição).
 
 ---
 
 ## 8. O menu Arquivo
 
-Toque no botão **📁** no cabeçalho. O menu abre como uma folha na parte inferior da tela; toque fora dela ou no **✕** para fechar.
+O menu **Arquivo**, no cabeçalho, reúne os comandos de gerenciamento e exportação.
 
-| Item | O que faz |
+| Comando | Finalidade |
 |---|---|
-| ➕ **Novo registro** | Volta à tela principal e **inicia uma medição** no modo selecionado. |
-| 📥 **Importar (JSON)** | Restaura registros de um backup `.json` exportado pelo app. |
-| 🗂️ **Exportar JSON** | Backup completo dos registros. |
-| 📝 **Exportar Markdown (.md)** | Relatório formatado em tabela. |
-| 📄 **Exportar TXT** | Relatório em texto puro. |
-| 📘 **Exportar DOCX** | Relatório para abrir no Word, Google Docs ou LibreOffice. |
-| 🖨️ **Imprimir / Salvar PDF** | Abre a impressão do Chrome com layout A4 limpo. |
-| 📲 **Instalar aplicativo** | Aparece só quando o Chrome permite instalar o app. |
-| 🌬️ **Sobre o Shunfenger** | Significado do nome, calibração e atalho para este manual. |
+| **Novo registro** | Retorna à tela de medição para iniciar outra sessão. |
+| **Importar JSON** | Recupera medições e, quando presentes no backup, suas fotografias. |
+| **Exportar JSON** | Gera uma cópia dos registros, incluindo fotografias codificadas no arquivo. |
+| **Exportar Markdown (.md)** | Cria relatório textual estruturado. |
+| **Exportar TXT** | Cria relatório em texto simples. |
+| **Exportar DOCX** | Cria documento compatível com editores de texto. |
+| **Imprimir / Salvar PDF** | Abre a impressão do navegador; o usuário pode selecionar PDF. |
+| **Instalar aplicativo** | Solicita instalação nativa ou apresenta instruções. |
+| **Sobre o Shunfenger** | Informações do aplicativo e ajuste de calibração. |
 
-Se não houver registros, as exportações e a impressão avisam "Não há registros para exportar".
+O compartilhamento individual não exige exportar o histórico inteiro: ele é acionado diretamente no cartão da medição.
 
 ---
 
 ## 9. Exportação, relatórios e backup
 
-### Onde ficam os arquivos exportados
+### Qual formato escolher?
 
-Os arquivos são baixados pelo Chrome para a pasta **Downloads** do celular, com nome no formato `shunfenger-AAAAMMDD-HHMM.extensão` (por exemplo, `shunfenger-20261104-1030.docx`).
-
-### Formatos
-
-| Formato | Para que usar | Conteúdo |
+| Formato | Uso recomendado | Fotografias |
 |---|---|---|
-| **JSON** | Backup e restauração | Todos os campos de cada registro, incluindo `id`, valores numéricos e coordenadas. |
-| **Markdown (.md)** | Publicar em GitHub, wikis e blocos de notas | Tabela com Data/Hora, dB, Classificação, Modo, Mín / Máx, Localização e Observação. |
-| **TXT** | Leitura rápida, e-mail, mensagens | Um bloco de texto por registro. |
-| **DOCX** | Uso profissional, relatórios | Documento em A4 paisagem com tabela e aviso de precisão. |
-| **Impressão / PDF** | Entregar em papel ou arquivo | Tabela em folha A4 com aviso de precisão. |
+| **JSON** | Backup completo e migração entre aparelhos | **Sim**, incorporadas como texto Base64. |
+| **Markdown (.md)** | Documentação e repositórios GitHub | Não incorpora os arquivos de imagem. |
+| **TXT** | Texto simples e consulta rápida | Não. |
+| **DOCX** | Relatório editável em processadores de texto | Não há garantia de incorporação das fotografias no DOCX desta versão. |
+| **Imprimir / PDF** | Relatório visual para arquivar ou imprimir | **Sim**, quando a fotografia está acessível. |
+| **PNG do cartão** | Compartilhar uma medição individual | **Sim**, se o registro tiver fotografia. |
 
-### Gerar um PDF
+Os arquivos são baixados pelo navegador; a pasta e a interface de salvamento variam conforme o dispositivo.
 
-1. Abra **Arquivo › Imprimir / Salvar PDF**.
-2. Na tela de impressão do Chrome, em **Destino**, escolha **Salvar como PDF** (ou uma impressora).
-3. Confirme. O layout da página é preparado automaticamente para A4.
+### Exportar um backup JSON com fotografias
 
-### Backup e restauração
+1. Abra **Arquivo → Exportar JSON**.
+2. Aguarde a leitura das fotografias salvas no IndexedDB.
+3. Salve o arquivo `.json` em um local seguro.
+4. Guarde uma segunda cópia fora do aparelho, se os registros forem importantes.
 
-- **Fazer backup:** Arquivo › **Exportar JSON** e guarde o arquivo (nuvem, e-mail, outro aparelho).
-- **Restaurar:** Arquivo › **Importar (JSON)** e escolha o arquivo.
-- A importação **soma** os registros aos que já existem, sem apagar nada. Registros com o mesmo identificador não são duplicados; o app informa quantos foram importados e quantos já existiam.
-- Arquivos que não sejam JSON do app, ou sem registros válidos, são recusados com um aviso.
+**Atenção:** as imagens ficam codificadas dentro do próprio JSON; não é necessário enviar uma pasta separada de fotos. Isso aumenta o tamanho do backup. A exportação depende de conseguir acessar as fotografias armazenadas no navegador.
 
-> Os registros ficam apenas neste aparelho e neste navegador. **Limpar os dados do site** no Chrome apaga o histórico. Faça backups com frequência se os dados forem importantes.
+### Importar um backup JSON
+
+1. Abra **Arquivo → Importar JSON**.
+2. Escolha um backup gerado pelo aplicativo.
+3. Aguarde a leitura dos registros e a recuperação das fotografias.
+4. Verifique no **Histórico** se as medições e as imagens apareceram.
+
+O código da versão 1.3 evita duplicar registros que já tenham o mesmo identificador. Em backups com fotografias, a restauração das imagens depende da disponibilidade do IndexedDB e de espaço no dispositivo. **Não apague os dados originais antes de confirmar que a restauração funcionou.**
+
+### Gerar PDF
+
+Abra **Arquivo → Imprimir / Salvar PDF** e, na janela do navegador, escolha **Salvar como PDF**. O relatório de impressão pode incluir as fotografias vinculadas às medições.
+
+### Privacidade das exportações
+
+O JSON pode conter **fotografias, coordenadas GPS, observações e horários**. Relatórios de texto e impressão também podem expor localização. Revise o conteúdo antes de enviá-lo a terceiros.
 
 ---
 
@@ -309,7 +345,9 @@ Você precisa de um **decibelímetro de referência** (ou um calibrador acústic
 1. Coloque o celular e o instrumento de referência lado a lado, à mesma distância da fonte.
 2. Meça com o Shunfenger (modo **30 s** é bom para isso) e anote o valor médio mostrado.
 3. Calcule: **novo offset = offset atual + (valor do instrumento − valor do app)**.
+
    Exemplo: o instrumento marca 70 dB, o app marca 64 dB e o offset atual é 100. O novo offset é 100 + (70 − 64) = **106**.
+
 4. Abra **Arquivo › Sobre o Shunfenger**, digite o novo valor em **Offset (dB)** e toque em **Salvar**.
 5. Repita a medição para conferir.
 
@@ -323,7 +361,7 @@ Você precisa de um **decibelímetro de referência** (ou um calibrador acústic
 - O desempenho depende do microfone: ruídos muito fracos (abaixo de uns 35 a 40 dB) e muito fortes (acima de uns 100 a 110 dB) tendem a ser menos confiáveis.
 - O app **desliga** cancelamento de eco, supressão de ruído e controle automático de ganho para não distorcer a medição. Mesmo assim, alguns aparelhos aplicam processamento próprio.
 - Capas, proteções de tela e poeira no orifício do microfone alteram a leitura.
-- Use os valores como **indicação aproximada**, ótima para comparar ambientes e acompanhar mudanças, mas não como medida certificada (norma IEC 61672).
+- Use os valores como **indicação aproximada**, útil para comparar ambientes e acompanhar mudanças, mas não como medida certificada (norma IEC 61672).
 
 ---
 
@@ -347,10 +385,13 @@ Você precisa de um **decibelímetro de referência** (ou um calibrador acústic
 ## 13. Privacidade e dados
 
 - O áudio é processado **no próprio aparelho**, em tempo real. O app **não grava** nem guarda o som; guarda apenas o número em dB.
-- O app **não envia nenhum dado** para servidores. Medições, localização e observações ficam no **armazenamento local do navegador (`localStorage`)**.
+- O processamento da medição e a geração do cartão PNG ocorrem **localmente**, sem serviço de processamento remoto.
+- Medições, localização e observações ficam no `localStorage`; **fotografias** ficam no `IndexedDB` do navegador.
 - A localização só é lida **quando você inicia uma medição** e só se você permitir.
 - Para apagar tudo: use **Apagar tudo** no Histórico, ou limpe os dados do site nas configurações do Chrome.
-- Arquivos exportados (JSON, DOCX etc.) contêm suas coordenadas e observações; compartilhe com cuidado.
+- O backup JSON pode conter **fotografias e coordenadas GPS**; compartilhe com cuidado.
+- No cartão PNG, a opção **Incluir coordenadas GPS** começa desmarcada. O usuário precisa ativá-la explicitamente para que as coordenadas apareçam na imagem.
+- Compartilhar por aplicativos externos pode transferir a imagem, o texto e o link ao serviço escolhido; as regras de privacidade desse serviço passam a valer.
 
 ---
 
@@ -369,7 +410,13 @@ Você precisa de um **decibelímetro de referência** (ou um calibrador acústic
 | **Exportação não baixou** | Confirme que o Chrome pode baixar arquivos e que há espaço no aparelho. Procure na pasta Downloads. |
 | **Histórico sumiu** | O histórico fica no navegador; limpar dados do site o apaga. Restaure um backup JSON em Arquivo › Importar. |
 | **Aparece versão antiga** | Feche o app totalmente e abra de novo. Se persistir, limpe os dados do site e acesse de novo (o histórico será apagado; exporte um backup antes). |
-| **Não consigo instalar** | Use o menu ⋮ do Chrome › Instalar app. Verifique se já não está instalado. |
+| **Não consigo instalar** | Toque em **Instalar grátis** e siga as instruções. A opção nativa depende do navegador e dos critérios de instalação do PWA. |
+| **O botão Instalar não aparece** | Verifique se o aplicativo já está aberto em modo instalado. Em navegador comum, atualize a página e confira se a versão nova foi carregada. |
+| **Não consigo adicionar fotografia** | Confira o formato da imagem, o espaço disponível e as permissões do navegador para acessar arquivos. |
+| **A fotografia desapareceu** | Fotografias dependem do IndexedDB do mesmo navegador/perfil. Limpeza dos dados do site pode apagá-las; restaure um backup JSON que as contenha. |
+| **A imagem compartilhável não é gerada** | Tente uma foto menor, libere espaço e atualize o aplicativo. O navegador precisa oferecer suporte a Canvas e PNG. |
+| **Compartilhar não abre outro aplicativo** | Use **Salvar imagem** e envie o PNG manualmente. O compartilhamento nativo não é oferecido em todos os navegadores. |
+| **GPS não aparece no cartão** | Marque **Incluir coordenadas GPS** e confirme que a medição original registrou localização. |
 | **Tela apagando durante a medição** | Mantenha o app aberto e a tela ativa. Desative a economia de bateria agressiva para o Chrome/app, se necessário. |
 
 ---
@@ -377,34 +424,64 @@ Você precisa de um **decibelímetro de referência** (ou um calibrador acústic
 ## 15. Perguntas frequentes
 
 **O app mede em dB(A) ou dB SPL?**
+
 Mede um nível aproximado em dB, sem ponderação em frequência. Não é dB(A). É uma estimativa útil, não uma medida certificada.
 
 **Posso usar o resultado como laudo ou prova legal?**
+
 Não. Para fins legais ou ocupacionais (por exemplo, NR-15), use um decibelímetro calibrado e profissional.
 
 **Por que o valor varia entre celulares?**
+
 Cada modelo tem um microfone e um processamento de áudio diferentes. Calibre com um instrumento de referência.
 
 **O app grava minha voz ou o som ambiente?**
+
 Não. O áudio é analisado em tempo real e descartado; só o valor em dB é guardado.
 
 **Funciona sem internet?**
+
 Sim, depois do primeiro acesso.
 
 **Funciona no iPhone?**
+
 O app foi pensado para Chrome no Android. Em outros navegadores, o comportamento de microfone, localização e instalação pode variar.
 
 **Qual a diferença entre média e valor instantâneo?**
+
 O instantâneo é o nível naquele momento. A média considera toda a duração da medição e é mais estável.
 
 **Como a média é calculada?**
+
 Pela energia sonora (média logarítmica em dB, equivalente ao nível equivalente, ou Leq), e não pela média simples dos números.
 
 **Posso editar a observação depois de salvar?**
+
 Sim, a qualquer momento, no Histórico. As alterações são salvas automaticamente.
 
-**Posso levar meus registros para outro celular?**
-Sim. Exporte um JSON no aparelho antigo e importe no novo.
+**Posso levar meus registros e fotografias para outro celular?**
+
+Sim. Exporte um JSON com as fotografias no aparelho antigo, transfira o arquivo e importe no novo. Confirme o resultado antes de apagar os originais.
+
+**A foto fica dentro do JSON?**
+
+Sim. Na versão 1.3, a fotografia pode ser incorporada ao registro exportado como uma string Base64.
+
+**A imagem compartilhada revela minha localização?**
+
+Por padrão, **não**. A inclusão de coordenadas GPS no cartão depende de marcar a opção correspondente. Isso não elimina possíveis informações de localização presentes em uma fotografia original.
+
+**Posso compartilhar sem internet?**
+
+Você pode gerar e salvar o PNG offline. O envio por aplicativos de mensagens ou redes sociais pode exigir conexão.
+
+**A imagem de compartilhamento tem um link clicável?**
+
+Não. O endereço escrito dentro do PNG é texto visual. Quando suportado, o compartilhamento nativo também envia o link em texto separado.
+
+**Por que o botão de instalação às vezes mostra instruções?**
+
+Porque nem todo navegador oferece o evento de instalação nativa. O aplicativo apresenta uma alternativa manual.
 
 ---
 
@@ -420,12 +497,18 @@ Sim. Exporte um JSON no aparelho antigo e importe no novo.
 6. O valor exibido é esse nível suavizado; a barra cobre 0–120 dB.
 7. Mínimo, máximo e **média de energia** (`10 · log10(média de 10^(nível/10))`) são acumulados a cada leitura.
 
+### Correção do indicador mínimo
+
+A versão 1.3 trata o mínimo como o menor **valor válido efetivamente observado** na sessão. Isso evita que o indicador permaneça artificialmente em `0,0 dB` por causa da inicialização da variável antes da primeira leitura.
+
 ### Formato do arquivo JSON
+
+Exemplo simplificado da estrutura de um registro exportado:
 
 ```json
 {
   "app": "Shunfenger Sound Level Meter",
-  "version": 1,
+  "version": 2,
   "exportedAt": "2026-11-04T13:30:00.000Z",
   "records": [
     {
@@ -443,12 +526,22 @@ Sim. Exporte um JSON no aparelho antigo e importe no novo.
       "acc": 12.0,
       "note": "Sala de aula"
     }
-  ]
+  ],
+  "photos": {
+    "m3k9x2ab1": "data:image/jpeg;base64,/9j/4AAQ..."
+  }
 }
 ```
 
+O exemplo acima foi abreviado para facilitar a leitura. A fotografia real contém uma sequência Base64 muito maior.
+
 | Campo | Descrição |
 |---|---|
+| `app` | Identificação do aplicativo que gerou o backup. |
+| `version` | Versão do formato de exportação JSON. |
+| `exportedAt` | Data e hora da exportação em formato ISO 8601. |
+| `records` | Lista dos registros de medição. |
+| `photos` | Objeto opcional com fotografias codificadas em Base64, indexadas pelo identificador do registro. |
 | `id` | Identificador único do registro. |
 | `ts` | Data e hora de início, em milissegundos desde 1970 (UTC). |
 | `mode` | `cont`, `10`, `20` ou `30`. |
@@ -459,60 +552,177 @@ Sim. Exporte um JSON no aparelho antigo e importe no novo.
 | `lat`, `lon`, `acc` | Latitude, longitude e precisão (m). `null` se indisponível. |
 | `note` | Observação do usuário (até 50 caracteres). |
 
-Ao importar, o app aceita um arquivo com a lista `records` (ou uma lista direta de registros) e exige, no mínimo, `ts` e `value` numéricos.
+Ao importar, o aplicativo aceita registros válidos e evita duplicações por identificador. Quando o backup contém fotografias, tenta restaurá-las no armazenamento local.
 
 ### Armazenamento local
 
-| Chave (`localStorage`) | Conteúdo |
+O Shunfenger utiliza dois mecanismos de armazenamento do navegador.
+
+**LocalStorage**
+
+Armazena os registros de medição e algumas preferências do aplicativo.
+
+| Chave | Conteúdo |
 |---|---|
 | `shunfenger.records.v1` | Lista de registros. |
 | `shunfenger.theme.v1` | Tema escolhido (`light` ou `dark`). |
 | `shunfenger.cal.v1` | Offset de calibração. |
 
+**IndexedDB**
+
+Armazena as fotografias associadas às medições. Cada imagem é vinculada ao identificador do registro correspondente.
+
+A separação permite manter os registros numéricos leves e armazenar as fotografias em uma estrutura mais apropriada para dados binários.
+
+### Fotografias e imagem compartilhável
+
+As fotografias são armazenadas em **IndexedDB** e associadas ao `id` da medição.
+
+A imagem para compartilhamento é desenhada com **Canvas 2D**, exportada como **PNG de 1080 × 1350 pixels** e pode ser compartilhada pela **Web Share API**, quando suportada.
+
+Sem compartilhamento nativo, o usuário pode salvar a imagem e enviá-la manualmente.
+
 ### Tecnologias
 
-Vanilla JavaScript, Web Audio API, Geolocation API, Screen Wake Lock API, Service Worker e Web App Manifest. Sem bibliotecas externas: o arquivo DOCX é montado no próprio app.
+- HTML5 e CSS3.
+- JavaScript puro (Vanilla JavaScript).
+- Web Audio API.
+- Geolocation API.
+- Screen Wake Lock API.
+- IndexedDB.
+- LocalStorage.
+- Canvas 2D.
+- Web Share API.
+- Service Worker.
+- Web App Manifest.
+
+O aplicativo não depende de bibliotecas externas para suas funções principais. O arquivo DOCX é montado pelo próprio aplicativo.
 
 ---
 
 ## 17. Estrutura do repositório e publicação
 
-```
+```text
 Shunfenger-Sound-Level-Meter/
-├── index.html                 # Tela principal (sem rolagem) e página de histórico
-├── style.css                  # Estilos, temas claro/escuro, splash e @media print
-├── app.js                     # Medição, geolocalização, histórico e exportações
+├── index.html                 # Interface principal e histórico
+├── style.css                  # Estilos, temas e impressão
+├── app.js                     # Medições, fotografias e exportações
 ├── manifest.json              # Configuração do PWA
-├── sw.js                      # Service Worker (offline-first)
-├── logo.svg                   # Logo vetorial
-├── logo.png                   # Logo 512×512
-├── favicon.ico                # Favicon
+├── sw.js                      # Service Worker e funcionamento offline
+├── logo.svg                   # Logotipo vetorial
+├── logo.png                   # Logotipo PNG
+├── favicon.ico                # Ícone do navegador
 ├── splash.png                 # Imagem de abertura
 ├── icon-192.png               # Ícone PWA 192×192
 ├── icon-512.png               # Ícone PWA 512×512
-├── icon-maskable-512.png      # Ícone PWA "maskable"
-└── README.md                  # Este manual
+├── icon-maskable-512.png      # Ícone adaptável
+├── Shunfengercover.png        # Imagem de capa do manual
+└── README.md                  # Manual completo
 ```
 
 ### Publicar no GitHub Pages
 
-1. Envie todos os arquivos para a raiz do repositório.
+1. Envie os arquivos para a raiz do repositório.
 2. Em **Settings › Pages**, selecione a branch `main` e a pasta `/ (root)`.
-3. Aguarde a publicação e acesse <https://magpe-stack.github.io/Shunfenger-Sound-Level-Meter/>.
+3. Aguarde a publicação.
+4. Acesse o endereço oficial:
+
+<https://magpe-stack.github.io/Shunfenger-Sound-Level-Meter/>
 
 ### Publicar uma nova versão
 
-1. Altere os arquivos desejados.
-2. Em `sw.js`, aumente o valor de `CACHE_VERSION` (por exemplo, de `v1.1.0` para `v1.1.1`). Isso força os celulares a baixarem a versão nova.
-3. Envie as alterações ao GitHub. Os aparelhos atualizam na próxima abertura do app.
+1. Altere os arquivos necessários.
+2. Em `sw.js`, atualize o identificador de cache utilizado pelo Service Worker, conforme a constante existente no código.
+3. Envie as alterações ao GitHub.
+4. Aguarde a publicação.
+5. Feche e reabra o aplicativo para carregar a versão atualizada.
+
+Se o navegador continuar exibindo uma versão antiga, pode ser necessário aguardar a atualização do Service Worker.
+
+**Atenção:** limpar os dados do site pode excluir medições e fotografias. Faça um backup JSON antes de executar esse procedimento.
 
 ---
 
 ## 18. Aviso importante
 
-O Shunfenger Sound Level Meter é uma ferramenta de **informação e conscientização**. As medições são **aproximadas**, feitas com o microfone de um smartphone, sem ponderação em frequência e sem calibração de fábrica. Elas **não substituem** um decibelímetro calibrado (IEC 61672), nem servem como laudo técnico, pericial ou ocupacional.
+O Shunfenger Sound Level Meter é uma ferramenta de **informação e conscientização**.
 
-Em caso de desconforto, zumbido ou perda de audição, procure um profissional de saúde (otorrinolaringologista ou fonoaudiólogo).
+As medições são **aproximadas**, feitas com o microfone de um smartphone, sem ponderação em frequência e sem calibração de fábrica.
+
+Elas **não substituem** um decibelímetro calibrado conforme a norma IEC 61672, nem servem como laudo técnico, pericial ou ocupacional.
+
+A classificação de risco apresentada pelo aplicativo é simplificada e não considera, por si só, todos os fatores necessários para avaliar a exposição sonora.
+
+Em caso de desconforto, zumbido ou perda de audição, procure um profissional de saúde, como otorrinolaringologista ou fonoaudiólogo.
+
+---
+
+## 19. Compartilhamento de cartões de medição
+
+A versão 1.3 permite transformar **cada medição individual** em uma imagem vertical de **1080 × 1350 pixels**, apropriada para enviar em aplicativos de mensagens e publicar em redes sociais.
+
+### O que aparece no cartão
+
+- Identidade visual e nome **Shunfenger Sound Level Meter**.
+- Nível sonoro registrado em dB e classificação.
+- Indicadores **Mínimo**, **Médio** e **Máximo**.
+- Data e hora, modo e duração da medição.
+- Fotografia vinculada, caso exista.
+- Observação, quando preenchida, sujeita ao espaço disponível.
+- Coordenadas GPS **somente quando autorizadas na opção de compartilhamento** e disponíveis no registro.
+- Chamada para instalar o aplicativo e endereço oficial.
+
+### Como compartilhar
+
+1. Abra **Histórico** e encontre a medição.
+2. Toque em **Compartilhar**.
+3. Confira a prévia do cartão.
+4. Para mostrar a localização, marque **Incluir coordenadas GPS**. A opção começa **desmarcada**.
+5. Escolha **Compartilhar** para abrir o painel nativo, **Salvar imagem** para obter o PNG ou **Copiar texto/link** para compartilhar as informações em texto.
+
+Se o dispositivo não aceitar compartilhamento de arquivos pela Web Share API, o aplicativo poderá compartilhar apenas texto/link ou oferecer o salvamento do PNG. O resultado depende do navegador.
+
+### Cuidados antes de publicar
+
+A fotografia pode mostrar rostos, placas, documentos ou outros detalhes privados. Confira a imagem e a observação antes de compartilhar.
+
+O GPS é omitido do cartão por padrão, mas a localização pode ser inferida por elementos visuais da foto.
+
+### Limitações
+
+O cartão é uma **imagem estática**, não um relatório interativo.
+
+O endereço do aplicativo desenhado no rodapé não é clicável.
+
+O recurso é informativo e não torna a medição certificada.
+
+---
+
+## 20. Novidades da versão 1.3 e checklist de testes
+
+### Resumo das novidades
+
+- Fotografias associadas aos registros do histórico, com armazenamento em IndexedDB.
+- Exportação JSON com fotografias incorporadas e importação para recuperação dessas imagens.
+- Cartão PNG vertical para compartilhar medições individuais.
+- Controle de privacidade para incluir ou ocultar coordenadas GPS no cartão.
+- Botão flutuante de instalação com alternativa de instruções manuais.
+- Tratamento do valor mínimo para evitar que uma inicialização em zero distorça o indicador.
+
+### Testes recomendados antes de depender dos dados
+
+- [ ] Iniciar e encerrar medições em todos os modos.
+- [ ] Confirmar que **Mínimo**, **Médio** e **Máximo** recebem valores válidos.
+- [ ] Adicionar, abrir, substituir e remover uma fotografia.
+- [ ] Criar um cartão com foto e outro sem foto.
+- [ ] Confirmar que o GPS não aparece na imagem quando a opção está desmarcada.
+- [ ] Salvar um PNG e verificar suas dimensões.
+- [ ] Exportar JSON, importar em outro navegador ou dispositivo e verificar se a foto reaparece.
+- [ ] Imprimir ou salvar um relatório em PDF.
+- [ ] Testar o botão **Instalar grátis**.
+- [ ] Testar o funcionamento sem conexão depois de instalar ou carregar o PWA.
+
+**Estado de validação:** este manual descreve os recursos previstos e implementados no código da versão 1.3. A compatibilidade completa ainda precisa ser confirmada em testes reais no dispositivo e no navegador utilizados.
 
 ---
 
