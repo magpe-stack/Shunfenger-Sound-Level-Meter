@@ -307,7 +307,7 @@ main { flex: 1; min-height: 0; position: relative; }
 .share-preview img { width: 100%; max-width: 310px; max-height: 48dvh; object-fit: contain; border-radius: 8px; }
 .share-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .share-actions > button { flex: 1 1 140px; }
-.install-fab { position: fixed; z-index: 35; right: 14px; bottom: calc(810px + var(--safe-b)); padding: 13px 18px; background: var(--p); color: #fff; border: 1px solid var(--pm); border-radius: 999px; box-shadow: 0 5px 22px #0005; font-weight: 800; font-size: .85rem; }
+.install-fab { position: fixed; z-index: 35; right: 14px; bottom: calc(610px + var(--safe-b)); padding: 13px 18px; background: var(--p); color: #fff; border: 1px solid var(--pm); border-radius: 999px; box-shadow: 0 5px 22px #0005; font-weight: 800; font-size: .85rem; }
 .install-fab:focus-visible, .rec-share:focus-visible { outline: 3px solid var(--pm); outline-offset: 3px; }
 .install-instructions { line-height: 1.6; padding: 10px 0; }
 @media print { .install-fab, #modal-share, #modal-install { display: none !important; } }
